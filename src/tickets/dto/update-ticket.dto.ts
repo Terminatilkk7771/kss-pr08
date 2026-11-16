@@ -1,4 +1,4 @@
-import { PartialType, PickType } from '@nestjs/mapped-types';
+import { ApiPropertyOptional, PartialType, PickType } from '@nestjs/swagger';
 import { IsInt, IsOptional, Min, ValidateIf } from 'class-validator';
 import { CreateTicketDto } from './create-ticket.dto.js';
 
@@ -14,7 +14,17 @@ export class UpdateTicketDto extends PartialType(
     'tags',
   ] as const),
 ) {
-  /** null – зняти виконавця. */
+  /**
+   * Ідентифікатор виконавця; null – зняти виконавця
+   * @example 3
+   */
+  @ApiPropertyOptional({
+    type: 'integer',
+    nullable: true,
+    minimum: 1,
+    description: 'Ідентифікатор виконавця; null – зняти виконавця',
+    example: 3,
+  })
   @IsOptional()
   @ValidateIf((_, value) => value !== null)
   @IsInt()

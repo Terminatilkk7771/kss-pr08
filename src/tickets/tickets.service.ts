@@ -7,7 +7,8 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { CLOCK, type Clock } from '../common/clock.js';
-import { type Page, PageQueryDto, paginate } from '../common/page.js';
+import { PageQueryDto } from '../common/page-query.dto.js';
+import { type Page, paginate } from '../common/page.js';
 import type { User } from '../users/user.model.js';
 import { UsersService } from '../users/users.service.js';
 import type { Comment } from './comment.model.js';
@@ -42,8 +43,9 @@ export class TicketsService {
         `${t.title} ${t.description ?? ''}`.toLowerCase().includes(q),
       );
     }
-    const desc = query.sort.startsWith('-');
-    const key = query.sort.replace('-', '') as 'createdAt' | 'priority';
+    const sort = query.sort ?? '-createdAt';
+    const desc = sort.startsWith('-');
+    const key = sort.replace('-', '') as 'createdAt' | 'priority';
     items.sort((a, b) => {
       const diff =
         key === 'priority'
@@ -51,7 +53,7 @@ export class TicketsService {
           : a.createdAt.localeCompare(b.createdAt);
       return (desc ? -diff : diff) || a.id - b.id;
     });
-    return paginate(items, query.page, query.pageSize);
+    return paginate(items, query.page ?? 1, query.pageSize ?? 10);
   }
 
   async findOne(id: number): Promise<Ticket> {
@@ -60,10 +62,10 @@ export class TicketsService {
     return ticket;
   }
 
-  async create(dto: CreateTicketDto, author: User): Promise<Ticket> {
-    if (dto.priority === 'critical' && author.role === 'student') {
+  async create(dto: CreateTicketDto, user: User): Promise<Ticket> {
+    if (dto.priority === 'critical' && user.role === 'student') {
       throw new ForbiddenException(
-        'Критичний пріоритет встановлює лише викладач або адміністратор',
+        'Здобувач не може створювати заявки з критичним пріоритетом',
       );
     }
     const now = this.clock.now().toISOString();
@@ -72,7 +74,7 @@ export class TicketsService {
       ...(dto.description ? { description: dto.description } : {}),
       status: 'open',
       priority: dto.priority,
-      authorId: author.id,
+      authorId: user.id,
       assigneeId: null,
       createdAt: now,
       updatedAt: now,
@@ -81,7 +83,6 @@ export class TicketsService {
   }
 
   async update(id: number, dto: UpdateTicketDto, user: User): Promise<Ticket> {
-    // Поля класу DTO, яких немає в запиті, мають значення undefined – відкидаємо їх.
     const patch: Partial<Omit<Ticket, 'id'>> = Object.fromEntries(
       Object.entries(dto).filter(([, v]) => v !== undefined),
     );
@@ -94,14 +95,14 @@ export class TicketsService {
       });
     }
     const ticket = await this.findOne(id);
-    if (user.role !== 'admin' && ticket.authorId !== user.id) {
+    if (ticket.authorId !== user.id && user.role !== 'admin') {
       throw new ForbiddenException(
-        'Змінювати заявку може лише її автор або адміністратор',
+        'Редагувати заявку може лише її автор або адміністратор',
       );
     }
     if (patch.assigneeId !== undefined && user.role !== 'admin') {
       throw new ForbiddenException(
-        'Призначати виконавця може лише адміністратор',
+        'Призначати виконавця заявки може лише адміністратор',
       );
     }
     if (patch.assigneeId) this.assertUserExists(patch.assigneeId, 'assigneeId');
@@ -139,12 +140,13 @@ export class TicketsService {
     await this.findOne(ticketId);
     return paginate(
       await this.repo.findComments(ticketId),
-      page.page,
-      page.pageSize,
+      page.page ?? 1,
+      page.pageSize ?? 10,
     );
   }
 
   async findComment(ticketId: number, commentId: number): Promise<Comment> {
+    await this.findOne(ticketId);
     const comment = (await this.repo.findComments(ticketId)).find(
       (c) => c.id === commentId,
     );
@@ -156,12 +158,12 @@ export class TicketsService {
   async addComment(
     ticketId: number,
     dto: CreateCommentDto,
-    author: User,
+    user: User,
   ): Promise<Comment> {
     await this.findOne(ticketId);
     return this.repo.addComment({
       ticketId,
-      authorId: author.id,
+      authorId: user.id,
       text: dto.text,
       createdAt: this.clock.now().toISOString(),
     });

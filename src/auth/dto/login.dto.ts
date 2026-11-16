@@ -1,10 +1,30 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
+/** Облікові дані для входу в систему. */
 export class LoginDto {
+  /**
+   * Електронна пошта користувача
+   * @example "a.petrenko@college.example.ua"
+   */
+  @ApiProperty({
+    format: 'email',
+    description: 'Електронна пошта користувача',
+    example: 'a.petrenko@college.example.ua',
+  })
   @IsEmail()
-  email: string;
+  email!: string;
 
+  /**
+   * Пароль користувача
+   * @example "student123"
+   */
+  @ApiProperty({
+    format: 'password',
+    description: 'Пароль користувача',
+    example: 'student123',
+  })
   @IsString()
-  @MinLength(8)
-  password: string;
+  @IsNotEmpty()
+  password!: string;
 }

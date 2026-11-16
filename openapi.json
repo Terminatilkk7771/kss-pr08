@@ -1,0 +1,1607 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/users": {
+      "get": {
+        "operationId": "listUsers",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Номер сторінки (починаючи з 1)",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "Кількість елементів на сторінці",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Сторінка користувачів",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UserEntity"
+                      }
+                    },
+                    "page": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "example": 1
+                    },
+                    "pageSize": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 50,
+                      "example": 10
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "example": 6
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Необхідна автентифікація",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Доступ заборонено",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Помилка валідації вхідних даних",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Список користувачів системи",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/me": {
+      "get": {
+        "operationId": "getCurrentUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Профіль поточного користувача",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Необхідна автентифікація",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Поточний автентифікований користувач",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{userId}": {
+      "get": {
+        "operationId": "getUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Користувач",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserEntity"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некоректний запит",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Необхідна автентифікація",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ресурс не знайдено",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Отримати користувача за ідентифікатором",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успішний вхід",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Необхідна автентифікація",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Помилка валідації вхідних даних",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "summary": "Вхід у систему",
+        "tags": [
+          "auth"
+        ],
+        "x-kss-action": true
+      }
+    },
+    "/tickets": {
+      "get": {
+        "operationId": "listTickets",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Номер сторінки (починаючи з 1)",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "Кількість елементів на сторінці",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Фільтр за станом заявки",
+            "schema": {
+              "$ref": "#/components/schemas/TicketStatus"
+            }
+          },
+          {
+            "name": "priority",
+            "required": false,
+            "in": "query",
+            "description": "Фільтр за пріоритетом",
+            "schema": {
+              "$ref": "#/components/schemas/Priority"
+            }
+          },
+          {
+            "name": "authorId",
+            "required": false,
+            "in": "query",
+            "description": "Фільтр за ідентифікатором автора",
+            "schema": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "assigneeId",
+            "required": false,
+            "in": "query",
+            "description": "Фільтр за ідентифікатором виконавця",
+            "schema": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Пошук за підрядком у назві та описі",
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "Поле та напрям сортування",
+            "schema": {
+              "default": "-createdAt",
+              "type": "string",
+              "enum": [
+                "createdAt",
+                "-createdAt",
+                "priority",
+                "-priority"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Сторінка заявок",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TicketEntity"
+                      }
+                    },
+                    "page": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "example": 1
+                    },
+                    "pageSize": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 50,
+                      "example": 10
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "example": 6
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Необхідна автентифікація",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Помилка валідації вхідних даних",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Список заявок із фільтрацією, сортуванням і пагінацією",
+        "tags": [
+          "tickets"
+        ]
+      },
+      "post": {
+        "operationId": "createTicket",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTicketDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Заявку створено",
+            "headers": {
+              "Location": {
+                "description": "Адреса створеного ресурсу",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference",
+                  "example": "/api/v1/tickets/7"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Необхідна автентифікація",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Доступ заборонено",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Помилка валідації вхідних даних",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Створити нову заявку",
+        "tags": [
+          "tickets"
+        ]
+      }
+    },
+    "/tickets/{ticketId}": {
+      "get": {
+        "operationId": "getTicket",
+        "parameters": [
+          {
+            "name": "ticketId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Заявка",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketEntity"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некоректний запит",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Необхідна автентифікація",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ресурс не знайдено",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Отримати заявку за ідентифікатором",
+        "tags": [
+          "tickets"
+        ]
+      },
+      "patch": {
+        "operationId": "updateTicket",
+        "parameters": [
+          {
+            "name": "ticketId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTicketDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Оновлена заявка",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketEntity"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некоректний запит",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Необхідна автентифікація",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Доступ заборонено",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ресурс не знайдено",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Помилка валідації вхідних даних",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Частково оновити заявку",
+        "tags": [
+          "tickets"
+        ]
+      },
+      "delete": {
+        "operationId": "deleteTicket",
+        "parameters": [
+          {
+            "name": "ticketId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Заявку видалено"
+          },
+          "400": {
+            "description": "Некоректний запит",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Необхідна автентифікація",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Доступ заборонено",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ресурс не знайдено",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Видалити заявку",
+        "tags": [
+          "tickets"
+        ]
+      }
+    },
+    "/tickets/{ticketId}/status": {
+      "post": {
+        "operationId": "changeTicketStatus",
+        "parameters": [
+          {
+            "name": "ticketId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Стан заявки змінено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketEntity"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некоректний запит",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Необхідна автентифікація",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Доступ заборонено",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ресурс не знайдено",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Конфлікт стану ресурсу",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Помилка валідації вхідних даних",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Змінити стан заявки за правилами життєвого циклу",
+        "tags": [
+          "tickets"
+        ],
+        "x-kss-action": true
+      }
+    },
+    "/tickets/{ticketId}/comments": {
+      "get": {
+        "operationId": "listTicketComments",
+        "parameters": [
+          {
+            "name": "ticketId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Номер сторінки (починаючи з 1)",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "Кількість елементів на сторінці",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Сторінка коментарів",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CommentEntity"
+                      }
+                    },
+                    "page": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "example": 1
+                    },
+                    "pageSize": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 50,
+                      "example": 10
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "example": 6
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некоректний запит",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Необхідна автентифікація",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ресурс не знайдено",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Помилка валідації вхідних даних",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Список коментарів до заявки",
+        "tags": [
+          "tickets",
+          "comments"
+        ]
+      },
+      "post": {
+        "operationId": "createTicketComment",
+        "parameters": [
+          {
+            "name": "ticketId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCommentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Коментар додано",
+            "headers": {
+              "Location": {
+                "description": "Адреса створеного ресурсу",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference",
+                  "example": "/api/v1/tickets/7"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentEntity"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некоректний запит",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Необхідна автентифікація",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ресурс не знайдено",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Помилка валідації вхідних даних",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Додати коментар до заявки",
+        "tags": [
+          "tickets",
+          "comments"
+        ]
+      }
+    },
+    "/tickets/{ticketId}/comments/{commentId}": {
+      "get": {
+        "operationId": "getTicketComment",
+        "parameters": [
+          {
+            "name": "ticketId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "commentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Коментар до заявки",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentEntity"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некоректний запит",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Необхідна автентифікація",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ресурс не знайдено",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Отримати коментар за ідентифікатором",
+        "tags": [
+          "tickets",
+          "comments"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Helpdesk API – служба технічної підтримки коледжу",
+    "description": "REST API служби технічної підтримки коледжу (генерація code-first із контролерів і DTO NestJS)",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Автентифікація"
+    },
+    {
+      "name": "tickets",
+      "description": "Заявки та їх життєвий цикл"
+    },
+    {
+      "name": "comments",
+      "description": "Коментарі до заявок"
+    },
+    {
+      "name": "users",
+      "description": "Користувачі системи"
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Локальний сервер розробки"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "Токен з POST /auth/login"
+      }
+    },
+    "schemas": {
+      "ProblemDetailsEntity": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "URI типу проблеми",
+            "example": "about:blank"
+          },
+          "title": {
+            "type": "string",
+            "description": "Короткий заголовок класу помилки",
+            "example": "Помилка валідації даних"
+          },
+          "status": {
+            "type": "integer",
+            "description": "Числовий HTTP-код стану",
+            "example": 422
+          },
+          "detail": {
+            "type": "string",
+            "description": "Детальний опис конкретної помилки",
+            "example": "Дані не відповідають вимогам"
+          },
+          "instance": {
+            "type": "string",
+            "description": "Шлях запиту, під час якого виникла помилка",
+            "example": "/api/v1/tickets"
+          },
+          "requestId": {
+            "type": "string",
+            "description": "Ідентифікатор запиту для трасування в журналі",
+            "example": "9f3c2a10-4b7d-4e1a-8c3b-1234567890ab"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "detail",
+          "instance"
+        ]
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "student",
+          "teacher",
+          "admin"
+        ],
+        "description": "Роль користувача в системі"
+      },
+      "UserEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Унікальний ідентифікатор користувача",
+            "example": 1,
+            "readOnly": true
+          },
+          "fullName": {
+            "type": "string",
+            "description": "ПІБ користувача",
+            "example": "Петренко Андрій Іванович"
+          },
+          "email": {
+            "type": "string",
+            "description": "Електронна пошта користувача",
+            "example": "a.petrenko@college.example.ua",
+            "format": "email"
+          },
+          "role": {
+            "description": "Роль користувача в системі",
+            "example": "student",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRole"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "fullName",
+          "email",
+          "role"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Електронна пошта користувача",
+            "example": "a.petrenko@college.example.ua",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "description": "Пароль користувача",
+            "example": "student123",
+            "format": "password"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "TokenEntity": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Токен доступу",
+            "example": "2f1c9a54-8d3e-4b7a-9f1e-6c2d8a4b0e71"
+          },
+          "tokenType": {
+            "description": "Схема авторизації",
+            "example": "Bearer",
+            "enum": [
+              "Bearer"
+            ],
+            "type": "string"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "description": "Час дії токена в секундах",
+            "example": 3600
+          }
+        },
+        "required": [
+          "accessToken",
+          "tokenType",
+          "expiresIn"
+        ]
+      },
+      "TicketStatus": {
+        "type": "string",
+        "enum": [
+          "open",
+          "in_progress",
+          "resolved",
+          "closed"
+        ],
+        "description": "Поточний стан заявки"
+      },
+      "Priority": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ],
+        "description": "Пріоритет заявки"
+      },
+      "TicketEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Ідентифікатор заявки",
+            "example": 1,
+            "readOnly": true
+          },
+          "title": {
+            "type": "string",
+            "description": "Коротка назва проблеми",
+            "example": "Не працює проєктор в ауд. 214"
+          },
+          "description": {
+            "type": "string",
+            "description": "Докладний опис проблеми",
+            "example": "Немає сигналу з HDMI"
+          },
+          "status": {
+            "description": "Поточний стан заявки",
+            "example": "open",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TicketStatus"
+              }
+            ]
+          },
+          "priority": {
+            "description": "Пріоритет заявки",
+            "example": "high",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Priority"
+              }
+            ]
+          },
+          "authorId": {
+            "type": "integer",
+            "description": "Ідентифікатор автора заявки",
+            "example": 2,
+            "readOnly": true
+          },
+          "assigneeId": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Виконавець; null – не призначено",
+            "example": 3
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Дата і час створення заявки",
+            "example": "2026-09-01T08:15:00.000Z",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Дата і час останнього оновлення заявки",
+            "example": "2026-09-01T08:15:00.000Z",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "tags": {
+            "description": "Теги заявки",
+            "example": [
+              "обладнання",
+              "аудиторія"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "status",
+          "priority",
+          "authorId",
+          "assigneeId",
+          "createdAt",
+          "updatedAt",
+          "tags"
+        ]
+      },
+      "CreateTicketDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Коротка назва проблеми",
+            "example": "Не працює проєктор в ауд. 214",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "description": {
+            "type": "string",
+            "description": "Докладний опис проблеми",
+            "example": "Немає сигналу з HDMI",
+            "maxLength": 500
+          },
+          "priority": {
+            "description": "Пріоритет заявки",
+            "example": "high",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Priority"
+              }
+            ]
+          },
+          "tags": {
+            "description": "Теги заявки",
+            "example": [
+              "обладнання",
+              "аудиторія"
+            ],
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "priority"
+        ]
+      },
+      "UpdateTicketDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Коротка назва проблеми",
+            "example": "Не працює проєктор в ауд. 214",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "description": {
+            "type": "string",
+            "description": "Докладний опис проблеми",
+            "example": "Немає сигналу з HDMI",
+            "maxLength": 500
+          },
+          "priority": {
+            "description": "Пріоритет заявки",
+            "example": "high",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Priority"
+              }
+            ]
+          },
+          "tags": {
+            "description": "Теги заявки",
+            "example": [
+              "обладнання",
+              "аудиторія"
+            ],
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assigneeId": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Ідентифікатор виконавця; null – зняти виконавця",
+            "example": 3,
+            "minimum": 1
+          }
+        }
+      },
+      "ChangeStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "description": "Цільовий стан заявки",
+            "example": "in_progress",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TicketStatus"
+              }
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "CommentEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Ідентифікатор коментаря",
+            "example": 1,
+            "readOnly": true
+          },
+          "ticketId": {
+            "type": "integer",
+            "description": "Ідентифікатор заявки",
+            "example": 1,
+            "readOnly": true
+          },
+          "authorId": {
+            "type": "integer",
+            "description": "Ідентифікатор автора коментаря",
+            "example": 3,
+            "readOnly": true
+          },
+          "text": {
+            "type": "string",
+            "description": "Текст коментаря",
+            "example": "Замінили кабель"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Дата і час створення коментаря",
+            "example": "2026-09-01T09:00:00.000Z",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "authorId",
+          "text",
+          "createdAt"
+        ]
+      },
+      "CreateCommentDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Текст коментаря",
+            "example": "Замінили кабель",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "text"
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "bearer": []
+    }
+  ]
+}
